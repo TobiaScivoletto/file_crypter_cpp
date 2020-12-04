@@ -1,9 +1,9 @@
 # file_crypter_cpp
 
-Questo è un programmino birichino che cifra cose.
+Questo è un programmino birichino che cifra cose.\n
 Le librerie base64.h e AES.h le ho copiate perché sono troppo scarso per averle scritte io.
 
-Con questo comando posso compilare:
+Con questo comando posso compilare:\n
 g++ main.cpp base64.h base64.cpp AES.h AES.cpp
 
 Ciao, buone cose.
