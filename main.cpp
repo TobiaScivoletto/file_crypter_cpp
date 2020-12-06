@@ -1,7 +1,4 @@
-/*
-programma che cifra e decifra i file
-g++ main.cpp base64.h base64.cpp AES.h AES.cpp
-*/
+//g++ main.cpp base64.h base64.cpp AES.h AES.cpp
 
 #include <iostream>
 #include <cstdlib>
@@ -11,19 +8,13 @@ g++ main.cpp base64.h base64.cpp AES.h AES.cpp
 #include <vector>
 
 #include "AES.h"
-#include "base64.h"
-
-#define KEY_LEN 256
-#define BUFFER_LEN 32	
+#include "base64.h"	
 
 using namespace std;
 
-int crypt_file(string, string);
-int decrypt_file(string, string, string);
-string generate_key();
-
 int main(){
 	string file_name, key, out_file_name;
+	AES aes(256);
 	
 	cout << "FILE CIPHER (AES_256)" << endl;
 	cout << "1) crypt file" << endl;
@@ -40,11 +31,13 @@ int main(){
 			//crypt file
 			cout << "\nfile name: ";
 			cin >> file_name;
+			cout << "output file name: ";
+			cin >> out_file_name;
 			
 			cout << "key(base64): ";
 			cin >> key;
 			
-			crypt_file(file_name, key);
+			aes.CryptFile(file_name, out_file_name, key);
 			break;
 			
 		case 2:
@@ -57,12 +50,12 @@ int main(){
 			cout << "key(base64): ";
 			cin >> key;
 			
-			decrypt_file(file_name, out_file_name, key);
+			aes.DecryptFile(file_name, out_file_name, key);
 			break;
 		
 		case 3:
 			//generate key
-			key = generate_key();
+			key = aes.GenerateKey();
 			cout << "\nThis is your new key: " << key << endl;
 			break;
 		
@@ -76,6 +69,7 @@ int main(){
 	return 0;
 }
 
+/*
 int crypt_file(string file_name, string key_str){
 	//decodifico la chiave da base64 a unsigned char
 	unsigned char key[BUFFER_LEN];
@@ -160,3 +154,4 @@ string generate_key(){
 	
 	return key_64;
 }
+*/

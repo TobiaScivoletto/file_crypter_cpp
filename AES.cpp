@@ -1,8 +1,10 @@
 #include "AES.h"
+#include "base64.h"
 
 AES::AES(int keyLen)
 {
   this->Nb = 4;
+  this->KEY_LEN = keyLen;
   switch (keyLen)
   {
   case 128:
@@ -525,8 +527,97 @@ void AES::printHexArray (unsigned char a[], unsigned int n)
 }
 
 
+//DA QUI INIZIANO LE FUNZIONI AGGIUNTE DA TOBIA SCIVOLETTO
+int AES::CryptFile(string file_name, string file_name_out, string key_str){
+	
+	//decodifico la chiave da base64 a unsigned char
+	int BUFFER_LEN = KEY_LEN / 8;
+	unsigned char key[BUFFER_LEN];
+	vector<BYTE> key_vector = base64_decode(key_str);
+	
+	int ii = 0;
+	for(auto i = key_vector.begin(); i != key_vector.end(); ++i){
+		key[ii] = *i;
+		ii++;
+	}
+	
+	//crypto il file
+	ifstream f_in(file_name, ios::binary );
+    ofstream f_out(file_name_out, ios::binary );
+	
+	unsigned char * buffer_plain = new unsigned char[BUFFER_LEN];
+	unsigned char * buffer_cipher;
+	unsigned int out_len = 0;
+	
+	while(!f_in.eof()){
+		//cripto il blocco di dati e lo scrivo nel file di output
+		f_in.read(reinterpret_cast<char *>(buffer_plain), BUFFER_LEN);
+		buffer_cipher = EncryptECB(buffer_plain, BUFFER_LEN, key, out_len);
+		f_out.write(reinterpret_cast<const char *>(buffer_cipher), out_len);
+	}
+	
+	f_in.close();
+	f_out.close();
+	
+	return 0;
+}
 
 
+int AES::DecryptFile(string file_name, string file_name_out, string key_str){
+	
+	//divido la lunghezza della chiave per 8, BUFFER_LEN è in byte, keyLen è in bit
+	int BUFFER_LEN = KEY_LEN / 8;
+	
+	
+	unsigned char key[BUFFER_LEN];
+	vector<BYTE> key_vector = base64_decode(key_str);
+	
+	int ii = 0;
+	for(auto i = key_vector.begin(); i != key_vector.end(); ++i){
+		//decodifico la chiave da base64 a unsigned char
+		key[ii] = *i;
+		ii++;
+	}
+	
+	
+	//cifro il file
+	ifstream f_in(file_name, ios::binary );
+    ofstream f_out(file_name_out, ios::binary );
+	
+	unsigned char * buffer_plain = new unsigned char[BUFFER_LEN];
+	unsigned char * buffer_cipher;
+	unsigned int out_len = 0;
+	
+	while(!f_in.eof()){
+		//decrypto il blocco e lo scrivo nel file di output
+		
+		f_in.read(reinterpret_cast<char *>(buffer_plain), BUFFER_LEN);
+		buffer_cipher = DecryptECB(buffer_plain, BUFFER_LEN, key);
+		f_out.write(reinterpret_cast<const char *>(buffer_cipher), BUFFER_LEN);
+	}
+	
+	f_in.close();
+	f_out.close();
+	
+	return 0;
+}
 
 
+string AES::GenerateKey(){
+	string key_64;
+	vector<BYTE> key;
+	int BUFFER_LEN = KEY_LEN / 8;
+	
+	//genero i byte casuali
+	srand(time(0));
+	for(int i=0; i<BUFFER_LEN; i++){
+		//genero un numero fra 0 e 255, poi lo casto ad unsigned char
+		key.push_back((unsigned char) rand() % 256);
+	}
+	
+	//converto in base64 la chiave
+	key_64 = base64_encode(&key[0], key.size());
+	
+	return key_64;
+}
 
